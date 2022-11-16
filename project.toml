@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+uuid = "0193b08c-77d8-4d22-bf51-d5800a85b33a"
+name = "sa-metameta"
+version = "0.0.1"
+authors = [
+  { name="HAP Proctor", email="hproctor@redhat.com" },
+]
+description = "Dynamic SQLAlchemy Metadata Reflection of One or More SQLALchemy Engines"
+readme = "README.md"
+license = "LICENSE"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache 2.0 License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "SQLAlchemy>=1.4.43",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Red-HAP/sa-metameta"
+"Bug Tracker" = "https://github.com/Red-HAP/sa-metameta/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sa_metadata"]

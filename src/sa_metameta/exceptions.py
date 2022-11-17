@@ -1,3 +1,4 @@
+"""Exceptions for the metameta module."""
 #    Copyright 2022 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,50 +14,59 @@
 #    limitations under the License.
 
 
-class MetaMetaException(Exception):
+class MetaMetaError(Exception):
     """Base MetaMeta exception."""
+
     pass
 
-class MetaMetaNotFound(MetaMetaException):
+
+class MetaMetaNotFoundError(MetaMetaError):
     """Base MetaMeta item, attribute not found exception."""
+
     _item_type = "item"
+
     def __init__(self, *args):
+        """
+        Instantiate a Not-Found exception.
+
+        Requires 1 argument which is the key or attribute that was not found.
+        """
         if len(args) < 1:
-            raise MetaMetaException(
-                "{0} exceptions requires a key argument".format(
-                    self.__class__.__name__
-                )
-            )
+            raise MetaMetaError("{0} exceptions requires a key argument".format(self.__class__.__name__))
 
         new_args = tuple(
-            m for m in (
-                "No {0} named '{1}' was found.".format(
-                    self._item_type,
-                    args[0]
-                ),
-                " ".join(args[1:])
+            m
+            for m in (
+                "No {0} named '{1}' was found.".format(self._item_type, args[0]),
+                " ".join(args[1:]),
             )
             if m
         )
         super().__init__(*new_args)
 
-class MetaMetaEngineNotFound(MetaMetaNotFound):
+
+class MetaMetaEngineNotFoundError(MetaMetaNotFoundError):
     """Base MetaMetaEngine item, attribute not found exception."""
+
     _item_type = "engine"
 
-class MetaMetaSchemaNotFound(MetaMetaNotFound):
+
+class MetaMetaSchemaNotFoundError(MetaMetaNotFoundError):
     """Base MetaMetaSchema item, attribute not found exception."""
+
     _item_type = "schema"
 
-class MetaMetaTableNotFound(MetaMetaNotFound):
+
+class MetaMetaTableNotFoundError(MetaMetaNotFoundError):
     """Base MetaMetaTable item, attribute not found exception."""
+
     _item_type = "table"
 
 
 __all__ = (
-    "MetaMetaException",
-    "MetaMetaNotFound",
-    "MetaMetaEngineNotFound",
-    "MetaMetaSchemaNotFound",
-    "MetaMetaTableNotFound",
+    "MetaMetaError",
+    "MetaMetaNotFoundError",
+    "MetaMetaEngineNotFoundError",
+    "MetaMetaSchemaNotFoundError",
+    "MetaMetaTableNotFoundError",
 )

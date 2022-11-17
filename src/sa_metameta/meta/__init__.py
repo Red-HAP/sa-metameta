@@ -1,3 +1,4 @@
+"""metameta module classes designed to work with psycopg2."""
 #    Copyright 2022 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,15 +14,14 @@
 #    limitations under the License.
 
 from __future__ import annotations
+
+from typing import List, Optional, Tuple
+
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncEngine
-from typing import List, Optional, Tuple
+
 from .. import MetaMetaBase
-from ..exceptions import (
-    MetaMetaEngineNotFound,
-    MetaMetaSchemaNotFound,
-    MetaMetaTableNotFound
-)
+from ..exceptions import MetaMetaEngineNotFound, MetaMetaSchemaNotFound, MetaMetaTableNotFound
 
 
 class MetaMeta(MetaMetaBase):
@@ -31,6 +31,7 @@ class MetaMeta(MetaMetaBase):
     The meta engines that this class tracks will be a MetaEngine type.
     Engines can be accessed by attribute or subscript notation.
     """
+
     def __init__(self):
         super().__init__()
         self._engines = self._items
@@ -41,14 +42,13 @@ class MetaMeta(MetaMetaBase):
         return MetaEngine
 
     @property
-    def inverse_child_class(self) -> "AMetaEngine":
+    def inverse_child_class(self) -> MetaEngine:  # AMetaEngine
         # Circumvent circular dependency error
         from ..asyncmeta import AMetaEngine
+
         return AMetaEngine
 
-    def register_engine(
-        self, engine: sa.engine.Engine, *, engine_name: Optional[str] = None
-    ) -> None:
+    def register_engine(self, engine: sa.engine.Engine, *, engine_name: Optional[str] = None) -> None:
         """
         Registers a SQLAlchemy engine class with a MetaMeta object.
 
@@ -57,10 +57,9 @@ class MetaMeta(MetaMetaBase):
         or via an attribute referencde:
             MetaMeta.<engine_name>
         """
-        class_is_metameta = (self.__class__.__name__ == "MetaMeta")
-        if (
-            (isinstance(engine, AsyncEngine) and class_is_metameta) or
-            (isinstance(engine, sa.engine.Engine) and not class_is_metameta)
+        class_is_metameta = self.__class__.__name__ == "MetaMeta"
+        if (isinstance(engine, AsyncEngine) and class_is_metameta) or (
+            isinstance(engine, sa.engine.Engine) and not class_is_metameta
         ):
             _child_class = self.inverse_child_claass
         else:
@@ -78,6 +77,7 @@ class MetaEngine(MetaMetaBase):
     The AMetaSchema class is designed to work with SQLAlchemy's AsyncEngine
     engine class.
     """
+
     def __init__(
         self,
         engine: sa.engine.Engine,
@@ -105,9 +105,7 @@ class MetaEngine(MetaMetaBase):
     def engine(self) -> sa.engine.Engine:
         return self._engine
 
-    def resolve_engine_name(
-        self, engine_name: Optional[str], engine: sa.engine.Engine
-    ) -> str:
+    def resolve_engine_name(self, engine_name: Optional[str], engine: sa.engine.Engine) -> str:
         """
         Resolves engine name if falsey.
 
@@ -116,16 +114,9 @@ class MetaEngine(MetaMetaBase):
         """
         if not engine_name:
             try:
-                return (
-                    engine.raw_connection().connection.get_dsn_parameters()[
-                        "dbname"
-                    ]
-                )
+                return engine.raw_connection().connection.get_dsn_parameters()["dbname"]
             except (KeyError, AttributeError) as e:
-                raise e.__class__(
-                    "Cannot detect engine name from connection. "
-                    "Specify engine name in arguments."
-                )
+                raise e.__class__("Cannot detect engine name from connection. " "Specify engine name in arguments.")
         else:
             return engine_name
 
@@ -148,10 +139,8 @@ class MetaEngine(MetaMetaBase):
         The query will filter out schemata that match any of the
         values in the attribute 'ns_excl_pref_regexs'.
         """
-        if (exclusions_params := getattr(self, "ns_excl_pref_regexs", {})):
-            exclusions = (
-                " and ".join((f"schema_name !~ :{k}" for k in exclusions_params))
-            )
+        if exclusions_params := getattr(self, "ns_excl_pref_regexs", {}):
+            exclusions = " and ".join((f"schema_name !~ :{k}" for k in exclusions_params))
         else:
             exclusions = ""
 
@@ -204,11 +193,11 @@ class MetaSchema(MetaMetaBase):
         return self._metadata
 
     @property
-    def metameta(self) -> AMetaMeta:
+    def metameta(self) -> MetaMeta:
         return self._metaengine.metameta
 
     @property
-    def metaengine(self) -> AMetaEngine:
+    def metaengine(self) -> MetaEngine:
         return self._metaengine
 
     @property
@@ -217,9 +206,7 @@ class MetaSchema(MetaMetaBase):
 
     @property
     def child_class(self) -> None:
-        raise AttributeError(
-            f"{self.__class__.__name__} has no 'child_class' attribute"
-        )
+        raise AttributeError(f"{self.__class__.__name__} has no 'child_class' attribute")
 
     def _reflect_objects(self) -> None:
         """
@@ -260,9 +247,4 @@ class MetaSchema(MetaMetaBase):
         self._reindex_tables()
 
 
-__all__ = (
-    "MetaMetaBase",
-    "MetaMeta",
-    "MetaEngine",
-    "MetaSchema"
-)
+__all__ = ("MetaMetaBase", "MetaMeta", "MetaEngine", "MetaSchema")

@@ -21,7 +21,7 @@ import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from .. import MetaMetaBase
-from ..exceptions import MetaMetaEngineNotFound, MetaMetaSchemaNotFound, MetaMetaTableNotFound
+from ..exceptions import MetaMetaEngineNotFoundError, MetaMetaSchemaNotFoundError, MetaMetaTableNotFoundError
 
 
 class MetaMeta(MetaMetaBase):
@@ -35,7 +35,7 @@ class MetaMeta(MetaMetaBase):
     def __init__(self):
         super().__init__()
         self._engines = self._items
-        self._notfound_exc = MetaMetaEngineNotFound
+        self._notfound_exc = MetaMetaEngineNotFoundError
 
     @property
     def child_class(self) -> MetaEngine:
@@ -90,8 +90,10 @@ class MetaEngine(MetaMetaBase):
         self.name = self.resolve_engine_name(engine_name, engine)
         self._metameta = metameta
         self._engine = engine
+        self.sessionmaker = sa.orm.sessionmaker
+        self._session_class = self.sessionmaker(self._engine)
         self.ns_excl_pref_regexs = {"expr_1": "^pg_", "expr_2": "^information_schema"}
-        self._notfound_exc = MetaMetaSchemaNotFound
+        self._notfound_exc = MetaMetaSchemaNotFoundError
 
     @property
     def child_class(self) -> MetaSchema:
@@ -136,9 +138,6 @@ class MetaEngine(MetaMetaBase):
         If no sessionmaker was registered, the sqlalchemy.orm.sessionmaker will be used by default.
         All arguments to this method are passed to the session class.
         """
-        if not hasattr(self, "sessionmaker"):
-            self.register_sessionmaker(sa.orm.sessionmaker)
-
         return self._session_class(*args, **kwargs)
 
     def register_schema(self, schema_name: str) -> None:
@@ -207,7 +206,7 @@ class MetaSchema(MetaMetaBase):
         self._metaengine = metaengine
         self.name = schema_name
         self._metadata = sa.MetaData(schema=self.name)
-        self._notfound_exc = MetaMetaTableNotFound
+        self._notfound_exc = MetaMetaTableNotFoundError
 
     @property
     def metadata(self) -> sa.MetaData:

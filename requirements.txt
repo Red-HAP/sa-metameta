@@ -10,6 +10,7 @@ flake8-string-format
 pep8-naming
 black
 isort
-sqlalchemy >= 1.4
+asyncpg
+sqlalchemy[asyncio] >= 1.4
 pytest
 pytest-asyncio

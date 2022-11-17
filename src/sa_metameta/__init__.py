@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import List
 
-from .exceptions import MetaMetaNotFound
+from .exceptions import MetaMetaNotFoundError
 
 
 class MetaMetaBase:
@@ -27,14 +27,14 @@ class MetaMetaBase:
         """Initializes base attributes."""
         self._items = {}
         self.name = "MetaMetaBase"
-        self._notfound_exc = MetaMetaNotFound
+        self._notfound_exc = MetaMetaNotFoundError
 
     def __iter__(self):
         """Return iterator for class items."""
         return iter(self._items)
 
     def __getitem__(self, key: str):
-        """Check for key in items else raise MetaMetaNotFound exeption."""
+        """Check for key in items else raise MetaMetaNotFoundError exeption."""
         if key not in self._items:
             raise self._notfound_exc(key)
         return self._items[key]
@@ -43,7 +43,7 @@ class MetaMetaBase:
         """
         Check for attr in items, else fallback to getattr.
 
-        If attr not found, raise MetaMetaNotFound exception.
+        If attr not found, raise MetaMetaNotFoundError exception.
         """
         if attr in self._items:
             return self._items[attr]
@@ -51,7 +51,7 @@ class MetaMetaBase:
             try:
                 super().__getattr__(attr)
             except AttributeError:
-                raise MetaMetaNotFound(attr)
+                raise self._notfound_exc(attr)
 
     def __contains__(self, item_name: str) -> bool:
         return item_name in self._items

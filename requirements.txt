@@ -1,5 +1,6 @@
 pre-commit
 asyncpg
+psycopg2-binary
 sqlalchemy[asyncio] >= 1.4
 pytest
 pytest-asyncio

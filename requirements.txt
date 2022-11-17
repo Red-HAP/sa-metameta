@@ -1,15 +1,4 @@
-flake8
-flake8-broken-line
-flake8-bugbear
-flake8-comprehensions
-flake8-debugger
-flake8-docstrings
-flake8-eradicate
-flake8-print
-flake8-string-format
-pep8-naming
-black
-isort
+pre-commit
 asyncpg
 sqlalchemy[asyncio] >= 1.4
 pytest

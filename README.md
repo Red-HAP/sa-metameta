@@ -6,11 +6,11 @@ Meta information of SQLAlchemy metadata by engine
 
 ## Purpose
 
-This module is designed to have a top-level class instance to which SQLAlchemy Engine instances can be registered as a MetaEngine. Each MetaEngine can then be probed directly to retrieve all tables by user schema. Thus an application can reference multiple databases and use the reflected `Table` instances to create queries for each.
+This module is designed to have a top-level class instance to which SQLAlchemy `Engine` instances can be registered as a `MetaEngine`. Each `MetaEngine` can then be probed directly to retrieve all tables by user schema. Thus an application can reference multiple databases and use the reflected `Table` instances to create queries for each.
 
 This module has classes that will probe a RDBMS that supports the `information_schema.schema` view to get table information for each schema in a database. Currently, only PostgreSQL is fully supported.
 
-This module will support psycopg2 and asyncpg..
+This module will support `psycopg2` and `asyncpg`.
 
 This module requires `SQLAlchemy` >= v1.4 for database probing and `Table` class creation.
 
@@ -24,7 +24,7 @@ Example:
 
 ```python
 import sqlalchemy as sa
-from metameta import meta
+from sa_metameta import meta
 
 engine = sa.create_engine("postgresql://postgres:pg_passwd@localhost:5432/my_database")
 
@@ -41,7 +41,6 @@ list(mm.my_database.public)
     "table2",
     ...
 ]
-
 ```
 
 The engine, schema, and table can be referenced by dot or subscript notation:

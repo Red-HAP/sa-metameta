@@ -31,6 +31,10 @@ class AMetaMeta(MetaMeta):
     def child_class(self) -> AMetaEngine:
         return AMetaEngine
 
+    @property
+    def inverse_child_class(self) -> MetaEngine:
+        return MetaEngine
+
 
 class AMetaEngine(MetaEngine):
     """

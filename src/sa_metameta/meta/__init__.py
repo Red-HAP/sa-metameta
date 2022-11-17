@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 import sqlalchemy as sa
+from sqlalchemy.ext.asyncio import AsyncEngine
 from typing import List, Optional, Tuple
 from .. import MetaMetaBase
 from ..exceptions import (
@@ -39,6 +40,12 @@ class MetaMeta(MetaMetaBase):
     def child_class(self) -> MetaEngine:
         return MetaEngine
 
+    @property
+    def inverse_child_class(self) -> "AMetaEngine":
+        # Circumvent circular dependency error
+        from ..asyncmeta import AMetaEngine
+        return AMetaEngine
+
     def register_engine(
         self, engine: sa.engine.Engine, *, engine_name: Optional[str] = None
     ) -> None:
@@ -50,7 +57,16 @@ class MetaMeta(MetaMetaBase):
         or via an attribute referencde:
             MetaMeta.<engine_name>
         """
-        meta_engine = self.child_class(engine, self, engine_name=engine_name)
+        class_is_metameta = (self.__class__.__name__ == "MetaMeta")
+        if (
+            (isinstance(engine, AsyncEngine) and class_is_metameta) or
+            (isinstance(engine, sa.engine.Engine) and not class_is_metameta)
+        ):
+            _child_class = self.inverse_child_claass
+        else:
+            _child_class = self.child_class
+
+        meta_engine = _child_class(engine, self, engine_name=engine_name)
         self._engines[meta_engine.name] = meta_engine
 
 

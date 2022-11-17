@@ -30,7 +30,7 @@ class MetaMetaNotFound(MetaMetaException):
 
         new_args = tuple(
             m for m in (
-                "No {0} type named '{1}' was registered.".format(
+                "No {0} named '{1}' was found.".format(
                     self._item_type,
                     args[0]
                 ),

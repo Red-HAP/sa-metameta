@@ -120,6 +120,27 @@ class MetaEngine(MetaMetaBase):
         else:
             return engine_name
 
+    def register_sessionmaker(self, sessionmaker) -> None:
+        """
+        Register a sqlalchemy sessionmaker with the MetaEngine.
+
+        This will also use the sessionmaker to create a session class for use with the `session` method.
+        """
+        self.sessionmaker = sessionmaker
+        self._session_class = self.sessionmaker(self.engine)
+
+    def session(self, *args, **kwargs):
+        """
+        Create a session instance for use with query execution.
+
+        If no sessionmaker was registered, the sqlalchemy.orm.sessionmaker will be used by default.
+        All arguments to this method are passed to the session class.
+        """
+        if not hasattr(self, "sessionmaker"):
+            self.register_sessionmaker(sa.orm.sessionmaker)
+
+        return self._session_class(*args, **kwargs)
+
     def register_schema(self, schema_name: str) -> None:
         """
         Registers a schema that exists within a db engine..

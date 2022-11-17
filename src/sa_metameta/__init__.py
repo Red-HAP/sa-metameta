@@ -1,3 +1,4 @@
+"""metameta base class definition."""
 #    Copyright 2022 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,35 +14,44 @@
 #    limitations under the License.
 
 from __future__ import annotations
-import sqlalchemy as sa
-from typing import Any, Hashable, List, Union
+
+from typing import List
+
 from .exceptions import MetaMetaNotFound
 
 
 class MetaMetaBase:
+    """Base class for metameta module."""
+
     def __init__(self):
+        """Initializes base attributes."""
         self._items = {}
         self.name = "MetaMetaBase"
         self._notfound_exc = MetaMetaNotFound
 
     def __iter__(self):
+        """Return iterator for class items."""
         return iter(self._items)
 
-    def __getitem__(
-        self, key: str
-    ) -> Union["MetaEngine", "MetaSchema", sa.Table]:
+    def __getitem__(self, key: str):
+        """Check for key in items else raise MetaMetaNotFound exeption."""
         if key not in self._items:
             raise self._notfound_exc(key)
         return self._items[key]
 
-    def __getattr__(self, key: str) -> Any:
-        if key in self._items:
-            return self._items[key]
+    def __getattr__(self, attr: str):
+        """
+        Check for attr in items, else fallback to getattr.
+
+        If attr not found, raise MetaMetaNotFound exception.
+        """
+        if attr in self._items:
+            return self._items[attr]
         else:
             try:
-                super().__getattr__(key)
+                super().__getattr__(attr)
             except AttributeError:
-                raise MetaMetaNotFound(key)
+                raise MetaMetaNotFound(attr)
 
     def __contains__(self, item_name: str) -> bool:
         return item_name in self._items
@@ -72,4 +82,4 @@ class MetaMetaBase:
         return sorted(self._items)
 
 
-__all__ = ("MetaMetaBase")
+__all__ = "MetaMetaBase"

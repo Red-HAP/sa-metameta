@@ -1,3 +1,4 @@
+"""metameta module classes designed to work with asyncio/asyncpg."""
 #    Copyright 2022 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,10 +14,12 @@
 #    limitations under the License.
 
 from __future__ import annotations
+
+from typing import List
+
 import sqlalchemy as sa
-from sqlalchemy.ext.asyncio import AsyncEngine
-from typing import List, Optional
-from ..meta import MetaMeta, MetaEngine, MetaSchema
+
+from ..meta import MetaEngine, MetaMeta, MetaSchema
 
 
 class AMetaMeta(MetaMeta):
@@ -27,6 +30,7 @@ class AMetaMeta(MetaMeta):
     The AMetaEngine class is designed to work with SQLAlchemy's AsyncEngine
     engine class.
     """
+
     @property
     def child_class(self) -> AMetaEngine:
         return AMetaEngine
@@ -44,6 +48,7 @@ class AMetaEngine(MetaEngine):
     The AMetaSchema class is designed to work with SQLAlchemy's AsyncEngine
     engine class.
     """
+
     @property
     def child_class(self) -> AMetaSchema:
         return AMetaSchema
@@ -83,6 +88,7 @@ class AMetaSchema(MetaSchema):
     get the table information and then dynamically build SQLAlchemy table
     objects.
     """
+
     def _get_reflection(self, conn):
         """
         Internal method to execute the MetaData.reflect()
@@ -115,9 +121,4 @@ class AMetaSchema(MetaSchema):
         self._reindex_tables()
 
 
-__all__ = (
-    "AMetaMetaBase",
-    "AMetaMeta",
-    "AMetaEngine",
-    "AMetaSchema"
-)
+__all__ = ("AMetaMetaBase", "AMetaMeta", "AMetaEngine", "AMetaSchema")

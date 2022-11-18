@@ -1,4 +1,4 @@
-![sa-metameta](docs/images/sa-metameta-logo.png)
+![](https://raw.githubusercontent.com/Red-HAP/sa-metameta/main/docs/images/sa-metameta-logo.png)
 
 # sa-metameta
 

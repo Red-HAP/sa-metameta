@@ -21,7 +21,12 @@ import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from .. import MetaMetaBase
-from ..exceptions import MetaMetaEngineNotFoundError, MetaMetaSchemaNotFoundError, MetaMetaTableNotFoundError
+from ..exceptions import (
+    MetaMetaEngineNotFoundError,
+    MetaMetaError,
+    MetaMetaSchemaNotFoundError,
+    MetaMetaTableNotFoundError,
+)
 
 
 class MetaMeta(MetaMetaBase):
@@ -34,8 +39,11 @@ class MetaMeta(MetaMetaBase):
 
     def __init__(self):
         super().__init__()
-        self._engines = self._items
         self._notfound_exc = MetaMetaEngineNotFoundError
+
+    @property
+    def engines(self):
+        return self._items
 
     @property
     def child_class(self) -> MetaEngine:
@@ -66,7 +74,7 @@ class MetaMeta(MetaMetaBase):
             _child_class = self.child_class
 
         meta_engine = _child_class(engine, self, engine_name=engine_name)
-        self._engines[meta_engine.name] = meta_engine
+        self._items[meta_engine.name] = meta_engine
 
 
 class MetaEngine(MetaMetaBase):
@@ -86,7 +94,6 @@ class MetaEngine(MetaMetaBase):
         engine_name: Optional[str] = None,
     ):
         super().__init__()
-        self.schemata = self._items
         self.name = self.resolve_engine_name(engine_name, engine)
         self._metameta = metameta
         self._engine = engine
@@ -107,6 +114,10 @@ class MetaEngine(MetaMetaBase):
     def engine(self) -> sa.engine.Engine:
         return self._engine
 
+    @property
+    def schemata(self):
+        return self._items
+
     def resolve_engine_name(self, engine_name: Optional[str], engine: sa.engine.Engine) -> str:
         """
         Resolves engine name if falsey.
@@ -115,10 +126,9 @@ class MetaEngine(MetaMetaBase):
         parameter is empty or None.
         """
         if not engine_name:
-            try:
-                return engine.raw_connection().connection.get_dsn_parameters()["dbname"]
-            except (KeyError, AttributeError) as e:
-                raise e.__class__("Cannot detect engine name from connection. " "Specify engine name in arguments.")
+            if not engine.url.database:
+                raise MetaMetaError("Cannot detect engine name from connection. Specify engine name in arguments.")
+            return engine.url.database
         else:
             return engine_name
 
@@ -150,7 +160,7 @@ class MetaEngine(MetaMetaBase):
             MetaEngine.<schema_name>
         """
         schema = self.child_class(schema_name, self)
-        self.schemata[schema_name] = schema
+        self._items[schema_name] = schema
 
     def _build_discover_engine_query(self) -> Tuple(str, dict):
         """
@@ -202,11 +212,14 @@ class MetaEngine(MetaMetaBase):
 class MetaSchema(MetaMetaBase):
     def __init__(self, schema_name: str, metaengine: MetaEngine):
         super().__init__()
-        self.tables = self._items
         self._metaengine = metaengine
         self.name = schema_name
         self._metadata = sa.MetaData(schema=self.name)
         self._notfound_exc = MetaMetaTableNotFoundError
+
+    @property
+    def tables(self):
+        return self._items
 
     @property
     def metadata(self) -> sa.MetaData:
@@ -240,7 +253,7 @@ class MetaSchema(MetaMetaBase):
 
     def _reindex_tables(self) -> None:
         _metadata = self.metadata
-        _tables = self.tables
+        _tables = self._items
         prefix = f"{self.name}."
         lprefix = len(prefix)
         for tab in _metadata.tables:

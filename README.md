@@ -64,3 +64,14 @@ query = sa.select(table1.c.label).filter(table1.c.quatloos > 200)
 db = engine.session()
 res = db.execute(query).all()
 ```
+
+
+The engine can be exported as yaml or ddl. This will write a `.yaml` or a `.sql` file depending on the method called.
+
+```python
+mm.my_database.as_yaml()
+# "my_database.yaml"
+
+mm.my_database.as_ddl()
+# "my_database.sql"
+```

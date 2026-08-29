@@ -24,6 +24,7 @@ Example:
 
 ```python
 import sqlalchemy as sa
+from sqlalchemy.orm import Session
 from sa_metameta import meta
 
 engine = sa.create_engine("postgresql://postgres:pg_passwd@localhost:5432/my_database")
@@ -39,6 +40,21 @@ list(mm.my_database.public)
 [
     "table1",
     "table2",
+    ...
+]
+
+# list() can be used at all MetaMeta levels
+# To get a list of engines (databases):
+list(mm)
+[
+    "my_database",
+    ...
+]
+
+# To get a list of all schemata in a database:
+list(mm.my_database)
+[
+    "public",
     ...
 ]
 ```
@@ -60,9 +76,15 @@ table1 = mm.my_database.public.table1
 To reference columns, use the Table().c.column syntax.
 
 ```python
+# Returns the MetaEngine object
+my_db = mm.my_database
+# Returns the SQLAlchemy Table object
+table1 = my_db.public.table1
+
 query = sa.select(table1.c.label).filter(table1.c.quatloos > 200)
-db = engine.session()
-res = db.execute(query).all()
+# To get the SQLAlchemy Engine object, just use the MetaEngine's "engine" attribute
+with Session(my_db.engine) as db:
+    res = db.execute(query).all()
 ```
 
 

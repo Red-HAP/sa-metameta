@@ -197,7 +197,7 @@ class MetaEngine(MetaMetaBase):
         query, params = self._build_discover_engine_query()
         schemata = None
         with self.engine.connect() as conn:
-            cur = conn.execute(sa.text(query), params)
+            cur = conn.execute(sa.text(query), params).mappings()
             schemata = [rec["schema_name"] for rec in cur]
 
         return schemata

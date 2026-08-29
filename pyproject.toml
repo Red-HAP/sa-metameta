@@ -1,20 +1,27 @@
+[project]
+name = "sa-metameta"
+version = "0.1.0"
+description = "Dynamic SQLAlchemy Metadata Reflection of One or More SQLALchemy Engines"
+authors = [
+    {name = "48.41.50",email = "48.41.50@gmail.com"}
+]
+license = "Apache-2.0"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "sqlalchemy (>=2.0.52,<3.0.0)",
+    "asyncpg (>=0.31.0,<0.32.0)",
+    "pyyaml (>=6.0.3,<7.0.0)",
+    "psycopg[binary] (>=3.3.4,<4.0.0)"
+]
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "ipython (>=9.17.0,<10.0.0)"
+]
+
+
 [build-system]
-requires = ["setuptools>=65.5.1"]
-build-backend = "setuptools.build_meta"
-
-
-[tool.black]
-line-length = 120
-target-version = ["py39", "py310", "py311"]
-extend-exclude = "docs"
-
-[tool.isort]
-profile = "black"
-combine_as_imports = true
-line_length = 120
-
-[tool.flake8]
-ignore = ['D101', 'D102', 'D105', 'D107', 'D401', 'D400']
-max-line-length = 120
-count = true
-show-source = true
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
